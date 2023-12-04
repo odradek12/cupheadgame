@@ -31,23 +31,35 @@ class GameScene extends Phaser.Scene {
         graphics.clear();
 
         graphics.fillStyle(0xADD8E6, 1);
-        graphics.fillRect(0, 0, 2, 200);
-        graphics.generateTexture('treeTexture', 2, 200);
+        graphics.fillRect(44, 0, 4, 200);
+        graphics.fillRect(10, 99, 120, 2);
+        graphics.fillRect(20, 30, 50, 2);
+        graphics.fillRect(25, 20, 40, 2);
+        graphics.fillRect(30, 10, 30, 2);
+        graphics.generateTexture('treeTexture', 80, 200);
         graphics.clear();
+
+        // coins
+        graphics.lineStyle(3, 0xFFFF00, 1);
+        graphics.beginPath();
+        graphics.moveTo(0, 0);
+        graphics.lineTo(10, 10);
+        graphics.moveTo(10, 0);
+        graphics.lineTo(0, 10);
+        graphics.closePath();
+        graphics.strokePath();
+        graphics.generateTexture('coinTexture', 10, 10);
     }
 
     create(){
         //Setting camera & world bounds
+        let levelWidth = 2400;
+        let initialGroundWidth = (2/3) * levelWidth;
+        let elevatedGroundWidth = levelWidth - initialGroundWidth;
 
         this.cameras.main.setBackgroundColor(0x000000);
-        this.physics.world.setBounds(0, 0, 1600, 600);
-
-        //The ground
-
-        this.ground = this.add.rectangle(400, 550, 2400, 100, 0x00FF00);
-        this.physics.add.existing(this.ground);
-        this.ground.body.immovable = true;
-        this.ground.body.allowGravity = false;
+        this.cameras.main.setBounds(0, 0, levelWidth, 600);
+        this.physics.world.setBounds(0, 0, levelWidth, 600); 
 
         //The player
 
@@ -70,14 +82,49 @@ class GameScene extends Phaser.Scene {
         this.upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.shootKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
 
-        this.physics.add.collider(this.player, this.ground);
-
         this.bullets = this.physics.add.group();
 
+       //The ground     
+
+        // this.ground = this.add.rectangle(400, 550, 2400, 100, 0x00FF00);
+        // this.physics.add.existing(this.ground);
+        // this.ground.body.immovable = true;
+        // this.ground.body.allowGravity = false;
+
+        // this.physics.add.collider(this.player, this.ground);
+
+        // Initial flat ground
+        const ground1 = this.add.rectangle(0, 550, 2134, 100, 0x00FF00); // 2/3 of 1600 is 1066.67, but we can round it
+        this.physics.add.existing(ground1, true); // The 'true' flag makes it static
+
+        // Elevated ground
+        const ground2 = this.add.rectangle(1067 + (533 / 2), 500, 533, 200, 0x00FF00); // 533 is the remaining 1/3 of 1600
+        this.physics.add.existing(ground2, true);
+
+        this.physics.add.collider(this.player, [ground1, ground2]);
+
+       // const ground1 = this.add.rectangle(0, 550, 1066, 100, 0x00FF00);
+
+        // let ground1 = this.physics.add.staticImage(initialGroundWidth/2, this.cameras.main.height - 50, 'groundTexture');
+        // ground1.setDisplaySize(initialGroundWidth, 100);
+        // ground1.setImmovable(true);
+
+        // let ground2 = this.physics.add.staticImage(initialGroundWidth + (elevatedGroundWidth/2), this.cameras.main.height - 150, 'groundTexture');
+        // ground2.setDisplaySize(initialGroundWidth, 100);
+        // ground2.setImmovable(true);
+
+        // this.cameras.main.setBackgroundColor(0x000000);
+        // this.physics.world.setBounds(0, 0, 1600, 600);
+
+         // this.physics.add.existing(ground1, true);
+
+        // this.physics.add.collider(this.player, [ground1]);
         // The enemies
 
         this.enemies = this.physics.add.group();
-        this.physics.add.collider(this.enemies, this.ground);
+        // this.physics.add.collider(this.enemies, this.ground);
+        this.physics.add.collider(this.enemies, [ground1, ground2]);
+
 
         for (let i = 0; i < 3; i++){
             let enemy = this.enemies.create(200 - i * 40, 480, 'enemyTexture');
@@ -105,26 +152,48 @@ class GameScene extends Phaser.Scene {
         });
 
 
-        // Add trees to background 
+        // Add trees to background
 
-        // const treeNumber = 5;
-        // this.trees = this.add.group();
+        this.trees = this.add.group();
 
-        // for (let i = 0; i < treeNumber; i++){
-        //     let tree = this.add.tileSprite(100 + (i * 50), this.cameras.main.centerY + 100, 2, 200, 'treeTexture');
-        //     // tree.setOrigin(0.5, 0.5);
-        //     this.trees.add(tree);
-        // }
+        for (let j=0; j<4; j++){
+            let xPosition = j * 150;
+            // let tree = this.add.image(xPosition, this.cameras.main.centerY + 100, 'treeTexture');
+            let tree = this.add.sprite(xPosition, this.cameras.main.centerY + 150, 'treeTexture');
+            let treeScale = Phaser.Math.Between(70, 100) / 100;
+            tree.setScale(treeScale);
 
-        this.trees = this.add.tileSprite(0, this.cameras.main.centerY, this.cameras.main.width * 2, 10, 'treeTexture');
-        // this.trees.setOrigin(0, 0.5);
+            let treeHeight = Phaser.Math.Between(0, 40);
+            tree.y -= treeHeight;
+
+            tree.setDepth(-1);
+            tree.setOrigin(0.5, 0.5);
+            tree.setScrollFactor(0.5);
+
+            this.trees.add(tree);
+        }
+
+        // coins
+
+        this.coins = this.physics.add.staticGroup();
+
+        this.coins.create(300, 300, 'coinTexture');
+        this.coins.create(350, 300, 'coinTexture');
+        this.coins.create(400, 300, 'coinTexture');
+
+        this.coins.create(800, 400, 'coinTexture');
+        this.coins.create(850, 400, 'coinTexture');
+        this.coins.create(900, 400, 'coinTexture');
+
+        this.physics.add.overlap(this.player, this.coins, this.collectItem, null, this)
+
+        // end create
     }
 
     update() {
         if (this.upKey.isDown && this.player.body.touching.down) {
             this.player.body.setVelocity(-300);
         }
-
 
         if (this.leftKey.isDown){
             this.player.body.setVelocityX(-this.playerSpeed);
@@ -136,8 +205,6 @@ class GameScene extends Phaser.Scene {
         else {
             this.player.body.setVelocityX(0);
         }
-
-
 
         if (this.shootKey.isDown && !this.isShooting) {
             this.isShooting = true;
@@ -160,7 +227,7 @@ class GameScene extends Phaser.Scene {
         //     tree.x -= parallaxSpeed;
         // });
 
-        this.trees.tilePositionX = this.cameras.main.scrollX * 0.5;
+        // this.trees.tilePositionX = this.cameras.main.scrollX * 0.5;
     } 
 
     shootBullet() {
@@ -176,6 +243,10 @@ class GameScene extends Phaser.Scene {
         bullet.outOfBoundsKill = true;
         bullet.body.allowGravity = false;
     }  
+
+    collectItem(player, coin) {
+        coin.destroy();
+    }
 }
 
 const config = {
