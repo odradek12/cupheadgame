@@ -6,6 +6,10 @@ import {
     Player
 } from './Player.js';
 
+import {
+    Enemy
+} from './Enemy.js';
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
@@ -17,20 +21,10 @@ class GameScene extends Phaser.Scene {
             y: 0,
             add: false
         });
-
+        Enemy.preload(this);
         graphics.fillStyle(0xFF0000, 1);
         graphics.fillRect(0, 0, 20, 4);
         graphics.generateTexture('bulletTexture', 20, 4);
-        graphics.clear();
-
-        graphics.fillStyle(0xADD8E6, 1);
-        graphics.beginPath();
-        graphics.moveTo(7.5, 0);
-        graphics.lineTo(15, 15);
-        graphics.lineTo(0, 15);
-        graphics.closePath();
-        graphics.fillPath();
-        graphics.generateTexture('enemyTexture', 15, 15);
         graphics.clear();
 
         graphics.fillStyle(0x008800, 1);
@@ -79,15 +73,6 @@ class GameScene extends Phaser.Scene {
 
         this.bullets = this.physics.add.group();
 
-        //The ground     
-
-        // this.ground = this.add.rectangle(400, 550, 2400, 100, 0x00FF00);
-        // this.physics.add.existing(this.ground);
-        // this.ground.body.immovable = true;
-        // this.ground.body.allowGravity = false;
-
-        // this.physics.add.collider(this.player, this.ground);
-
         // Initial flat ground
         const ground1 = this.add.rectangle(0, 550, 2134, 100, 0x00FF00); // 2/3 of 1600 is 1066.67, but we can round it
         this.physics.add.existing(ground1, true); // The 'true' flag makes it static
@@ -98,53 +83,43 @@ class GameScene extends Phaser.Scene {
 
         this.physics.add.collider(this.player, [ground1, ground2]);
 
-        // const ground1 = this.add.rectangle(0, 550, 1066, 100, 0x00FF00);
-
-        // let ground1 = this.physics.add.staticImage(initialGroundWidth/2, this.cameras.main.height - 50, 'groundTexture');
-        // ground1.setDisplaySize(initialGroundWidth, 100);
-        // ground1.setImmovable(true);
-
-        // let ground2 = this.physics.add.staticImage(initialGroundWidth + (elevatedGroundWidth/2), this.cameras.main.height - 150, 'groundTexture');
-        // ground2.setDisplaySize(initialGroundWidth, 100);
-        // ground2.setImmovable(true);
-
-        // this.cameras.main.setBackgroundColor(0x000000);
-        // this.physics.world.setBounds(0, 0, 1600, 600);
-
-        // this.physics.add.existing(ground1, true);
-
-        // this.physics.add.collider(this.player, [ground1]);
-        // The enemies
-
-        this.enemies = this.physics.add.group();
+        // this.enemies = this.physics.add.group();
         // this.physics.add.collider(this.enemies, this.ground);
-        this.physics.add.collider(this.enemies, [ground1, ground2]);
+        ;
 
+
+        // for (let i = 0; i < 3; i++) {
+        //     let enemy = this.enemies.create(200 - i * 40, 480, 'enemyTexture');
+        //     enemy.setCollideWorldBounds(true);
+        //     enemy.body.allowGravity = true;
+        // }
+
+        this.enemies = [];
 
         for (let i = 0; i < 3; i++) {
-            let enemy = this.enemies.create(200 - i * 40, 480, 'enemyTexture');
-            enemy.setCollideWorldBounds(true);
-            enemy.body.allowGravity = true;
+            let enemy = new Enemy(this, 100 * i, 300, 'enemyTexture'); // Adjust positions and texture as needed
+            this.enemies.push(enemy);
         }
-
+        this.physics.add.collider(this.enemies, [ground1, ground2])
+        
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(275, 400, 'platformTexture');
         this.platforms.create(425, 400, 'platformTexture');
         this.physics.add.collider(this.player, this.platforms);
 
-        this.time.addEvent({
-            delay: 1000,
-            callback: () => {
-                this.enemies.getChildren().forEach(enemy => {
-                    if (this.player.x > enemy.x) {
-                        enemy.setVelocityX(100);
-                    } else if (this.player.x < enemy.x) {
-                        enemy.setVelocityX(-100);
-                    }
-                })
-            },
-            loop: true
-        });
+        // this.time.addEvent({
+        //     delay: 1000,
+        //     callback: () => {
+        //         this.enemies.getChildren().forEach(enemy => {
+        //             if (this.player.x > enemy.x) {
+        //                 enemy.setVelocityX(100);
+        //             } else if (this.player.x < enemy.x) {
+        //                 enemy.setVelocityX(-100);
+        //             }
+        //         })
+        //     },
+        //     loop: true
+        // });
 
 
         // Add trees to background
@@ -187,28 +162,10 @@ class GameScene extends Phaser.Scene {
 
     update() {
 
-        // if (this.shootKey.isDown && !this.isShooting) {
-        //     this.isShooting = true;
-        //     this.shootBullet();
-        //     this.time.delayedCall(250, () => {
-        //         this.isShooting = false;
-        //     })
-        // }
-
         this.physics.collide(this.bullets, this.enemies, (bullet, enemy) => {
             bullet.destroy();
             enemy.destroy();
         })
-
-        // const cameraSpeed = 0.5;
-
-        // const parallaxSpeed = cameraSpeed * 0.5;
-
-        // this.trees.getChildren().forEach(tree => {
-        //     tree.x -= parallaxSpeed;
-        // });
-
-        // this.trees.tilePositionX = this.cameras.main.scrollX * 0.5;
 
         this.player.update();
     }

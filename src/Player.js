@@ -3,17 +3,14 @@ export class Player extends Phaser.GameObjects.Rectangle {
         super(scene, x, y, width, height, color);
         this.scene = scene;
 
-        // Initialize player properties
         this.playerSpeed = 250;
 
-        // Add the player to the scene
         this.scene.add.existing(this);
 
         // Adding physics
         this.scene.physics.add.existing(this);
         this.body.setCollideWorldBounds(true);
 
-        // Player's initial facing direction
         this.facing = 'right';
 
         // Set up keyboard input
@@ -26,7 +23,6 @@ export class Player extends Phaser.GameObjects.Rectangle {
     }
 
     update() {
-        // Update logic for the player
         if (this.cursors.up.isDown && this.body.touching.down) {
             this.body.setVelocityY(-300);
             console.log("something");
