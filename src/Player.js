@@ -25,17 +25,14 @@ export class Player extends Phaser.GameObjects.Rectangle {
     update() {
         if (this.cursors.up.isDown && this.body.touching.down) {
             this.body.setVelocityY(-300);
-            console.log("something");
         }
 
         if (this.cursors.left.isDown) {
             this.body.setVelocityX(-this.playerSpeed);
             this.facing = 'left';
-            console.log("left");
         } else if (this.cursors.right.isDown) {
             this.body.setVelocityX(this.playerSpeed);
             this.facing = 'right';
-            console.log("right");
         } else {
             this.body.setVelocityX(0);
         }

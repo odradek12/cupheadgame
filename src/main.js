@@ -83,44 +83,29 @@ class GameScene extends Phaser.Scene {
 
         this.physics.add.collider(this.player, [ground1, ground2]);
 
-        // this.enemies = this.physics.add.group();
-        // this.physics.add.collider(this.enemies, this.ground);
-        ;
+        this.enemies = this.add.group({
+            classType: Enemy,
+            // runChildUpdate: true // This will automatically call update on each enemy
+        });
 
-
-        // for (let i = 0; i < 3; i++) {
-        //     let enemy = this.enemies.create(200 - i * 40, 480, 'enemyTexture');
-        //     enemy.setCollideWorldBounds(true);
-        //     enemy.body.allowGravity = true;
-        // }
-
-        this.enemies = [];
-
+        // Adding enemies to the group
         for (let i = 0; i < 3; i++) {
-            let enemy = new Enemy(this, 100 * i, 300, 'enemyTexture'); // Adjust positions and texture as needed
-            this.enemies.push(enemy);
+            this.enemies.add(new Enemy(this, 100 + (50 * i), 450));
         }
+
+        this.time.addEvent({
+            delay: 1000,
+            callback: this.updateEnemies,
+            callbackScope: this,
+            loop: true
+        });
+
         this.physics.add.collider(this.enemies, [ground1, ground2])
-        
+
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(275, 400, 'platformTexture');
         this.platforms.create(425, 400, 'platformTexture');
         this.physics.add.collider(this.player, this.platforms);
-
-        // this.time.addEvent({
-        //     delay: 1000,
-        //     callback: () => {
-        //         this.enemies.getChildren().forEach(enemy => {
-        //             if (this.player.x > enemy.x) {
-        //                 enemy.setVelocityX(100);
-        //             } else if (this.player.x < enemy.x) {
-        //                 enemy.setVelocityX(-100);
-        //             }
-        //         })
-        //     },
-        //     loop: true
-        // });
-
 
         // Add trees to background
 
@@ -168,6 +153,7 @@ class GameScene extends Phaser.Scene {
         })
 
         this.player.update();
+        // this.enemies.getChildren().forEach(enemy => enemy.update(this.player));
     }
 
     shootBullet() {
@@ -186,6 +172,12 @@ class GameScene extends Phaser.Scene {
 
     collectItem(player, coin) {
         coin.destroy();
+    }
+
+    updateEnemies() {
+        this.enemies.getChildren().forEach(enemy => {
+            enemy.changeDirection(this.player);
+        });
     }
 }
 
