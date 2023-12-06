@@ -14,6 +14,10 @@ import {
     Enemy
 } from './Enemy.js';
 
+import {
+    Coin
+} from './Coin.js';
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
@@ -26,6 +30,7 @@ class GameScene extends Phaser.Scene {
             add: false
         });
         Enemy.createGraphics(this);
+        Coin.preload(this);
         this.level = new Level(this);
         this.level.preload();
 
@@ -42,17 +47,6 @@ class GameScene extends Phaser.Scene {
         graphics.fillRect(30, 10, 30, 2);
         graphics.generateTexture('treeTexture', 80, 200);
         graphics.clear();
-
-        // coins
-        graphics.lineStyle(3, 0xFFFF00, 1);
-        graphics.beginPath();
-        graphics.moveTo(0, 0);
-        graphics.lineTo(10, 10);
-        graphics.moveTo(10, 0);
-        graphics.lineTo(0, 10);
-        graphics.closePath();
-        graphics.strokePath();
-        graphics.generateTexture('coinTexture', 10, 10);
     }
 
     create() {
@@ -122,19 +116,27 @@ class GameScene extends Phaser.Scene {
             this.trees.add(tree);
         }
 
-        // coins
-
-        this.coins = this.physics.add.staticGroup();
-
-        this.coins.create(300, 300, 'coinTexture');
-        this.coins.create(350, 300, 'coinTexture');
-        this.coins.create(400, 300, 'coinTexture');
-
-        this.coins.create(800, 400, 'coinTexture');
-        this.coins.create(850, 400, 'coinTexture');
-        this.coins.create(900, 400, 'coinTexture');
-
-        this.physics.add.overlap(this.player, this.coins, this.collectItem, null, this)
+        const coinPositions = [{
+            x: 300,
+            y: 300
+        }, {
+            x: 350,
+            y: 300
+        }, {
+            x: 400,
+            y: 300
+        }, {
+            x: 800,
+            y: 400
+        }, {
+            x: 850,
+            y: 400
+        }, {
+            x: 900,
+            y: 400
+        }];
+        this.coins = Coin.createCoins(this, coinPositions);
+        this.physics.add.overlap(this.player, this.coins, Coin.collectItem, null, this);
     }
 
     update() {
@@ -160,11 +162,6 @@ class GameScene extends Phaser.Scene {
         bullet.outOfBoundsKill = true;
         bullet.body.allowGravity = false;
     }
-
-    collectItem(player, coin) {
-        coin.destroy();
-    }
-
     updateEnemies() {
         this.enemies.getChildren().forEach(enemy => {
             enemy.changeDirection(this.player);
