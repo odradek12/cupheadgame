@@ -39,8 +39,9 @@ export class Level {
     }
 
     setupCollisions(assets) {
-        for (let i = 0; i < assets.length; i++) {
-            this.scene.physics.add.collider(assets[i], [this.ground1, this.ground2]);
+        // for (let i = 0; i < assets.length; i++) {
+        for (const asset of assets) {
+            this.scene.physics.add.collider(asset, [this.ground1, this.ground2]);
         }
         // Add more collision setups if necessary
     }

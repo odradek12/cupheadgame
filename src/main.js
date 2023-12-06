@@ -25,7 +25,7 @@ class GameScene extends Phaser.Scene {
             y: 0,
             add: false
         });
-        Enemy.preload(this);
+        Enemy.createGraphics(this);
         this.level = new Level(this);
         this.level.preload();
 
@@ -97,8 +97,6 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        // this.physics.add.collider(this.enemies, [ground1, ground2])
-
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(275, 400, 'platformTexture');
         this.platforms.create(425, 400, 'platformTexture');
@@ -110,7 +108,6 @@ class GameScene extends Phaser.Scene {
 
         for (let j = 0; j < 4; j++) {
             let xPosition = j * 150;
-            // let tree = this.add.image(xPosition, this.cameras.main.centerY + 100, 'treeTexture');
             let tree = this.add.sprite(xPosition, this.cameras.main.centerY + 150, 'treeTexture');
             let treeScale = Phaser.Math.Between(70, 100) / 100;
             tree.setScale(treeScale);
@@ -138,8 +135,6 @@ class GameScene extends Phaser.Scene {
         this.coins.create(900, 400, 'coinTexture');
 
         this.physics.add.overlap(this.player, this.coins, this.collectItem, null, this)
-
-        // end create
     }
 
     update() {

@@ -10,6 +10,7 @@ export class Enemy extends Phaser.GameObjects.Sprite {
         this.scene.add.existing(this);
         this.scene.physics.add.existing(this);
     }
+    
     changeDirection(player) {
         // Change the enemy's direction based on the player's position
         if (player.x > this.x) {
@@ -19,7 +20,7 @@ export class Enemy extends Phaser.GameObjects.Sprite {
         }
     }
 
-    static preload(scene) {
+    static createGraphics(scene) {
         let graphics = scene.make.graphics({
             x: 0,
             y: 0,
@@ -36,15 +37,4 @@ export class Enemy extends Phaser.GameObjects.Sprite {
         graphics.generateTexture('enemyTexture', 15, 15);
         graphics.clear();
     }
-
-    // update(player) {
-    //     // Adjust the enemy's velocity based on the player's position
-    //     if (player.x > this.x) {
-    //         this.body.setVelocityX(this.speed);
-    //     } else if (player.x < this.x) {
-    //         this.body.setVelocityX(-this.speed);
-    //     }
-    // }
-
-
 }
