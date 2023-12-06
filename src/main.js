@@ -3,6 +3,10 @@
 // import Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js';
 
 import {
+    Level
+} from './Level.js';
+
+import {
     Player
 } from './Player.js';
 
@@ -22,14 +26,12 @@ class GameScene extends Phaser.Scene {
             add: false
         });
         Enemy.preload(this);
+        this.level = new Level(this);
+        this.level.preload();
+
         graphics.fillStyle(0xFF0000, 1);
         graphics.fillRect(0, 0, 20, 4);
         graphics.generateTexture('bulletTexture', 20, 4);
-        graphics.clear();
-
-        graphics.fillStyle(0x008800, 1);
-        graphics.fillRect(0, 0, 50, 10);
-        graphics.generateTexture('platformTexture', 50, 10);
         graphics.clear();
 
         graphics.fillStyle(0xADD8E6, 1);
@@ -63,25 +65,19 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, levelWidth, 600);
         this.physics.world.setBounds(0, 0, levelWidth, 600);
 
+        this.level.create();
+
         //The player
         this.player = new Player(this, 400, 300, 10, 10, 0xFFFFE0);
         this.cameras.main.startFollow(this.player);
         this.cameras.main.setDeadzone(200, 600);
 
+
+
         this.bulletSpeed = 1500;
         // this.shootKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
 
         this.bullets = this.physics.add.group();
-
-        // Initial flat ground
-        const ground1 = this.add.rectangle(0, 550, 2134, 100, 0x00FF00); // 2/3 of 1600 is 1066.67, but we can round it
-        this.physics.add.existing(ground1, true); // The 'true' flag makes it static
-
-        // Elevated ground
-        const ground2 = this.add.rectangle(1067 + (533 / 2), 500, 533, 200, 0x00FF00); // 533 is the remaining 1/3 of 1600
-        this.physics.add.existing(ground2, true);
-
-        this.physics.add.collider(this.player, [ground1, ground2]);
 
         this.enemies = this.add.group({
             classType: Enemy,
@@ -92,6 +88,7 @@ class GameScene extends Phaser.Scene {
         for (let i = 0; i < 3; i++) {
             this.enemies.add(new Enemy(this, 100 + (50 * i), 450));
         }
+        this.level.setupCollisions([this.player, this.enemies]);
 
         this.time.addEvent({
             delay: 1000,
@@ -100,7 +97,7 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        this.physics.add.collider(this.enemies, [ground1, ground2])
+        // this.physics.add.collider(this.enemies, [ground1, ground2])
 
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(275, 400, 'platformTexture');
@@ -153,7 +150,6 @@ class GameScene extends Phaser.Scene {
         })
 
         this.player.update();
-        // this.enemies.getChildren().forEach(enemy => enemy.update(this.player));
     }
 
     shootBullet() {
