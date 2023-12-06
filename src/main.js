@@ -18,9 +18,14 @@ import {
     Coin
 } from './Coin.js';
 
+import {
+    Bullet
+} from './Bullet.js';
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
+        this.lastFired = 0;
     }
 
     preload() {
@@ -31,13 +36,10 @@ class GameScene extends Phaser.Scene {
         });
         Enemy.createGraphics(this);
         Coin.preload(this);
+        Bullet.preload(this);
+
         this.level = new Level(this);
         this.level.preload();
-
-        graphics.fillStyle(0xFF0000, 1);
-        graphics.fillRect(0, 0, 20, 4);
-        graphics.generateTexture('bulletTexture', 20, 4);
-        graphics.clear();
 
         graphics.fillStyle(0xADD8E6, 1);
         graphics.fillRect(44, 0, 4, 200);
@@ -52,8 +54,6 @@ class GameScene extends Phaser.Scene {
     create() {
         //Setting camera & world bounds
         let levelWidth = 2400;
-        let initialGroundWidth = (2 / 3) * levelWidth;
-        let elevatedGroundWidth = levelWidth - initialGroundWidth;
 
         this.cameras.main.setBackgroundColor(0x000000);
         this.cameras.main.setBounds(0, 0, levelWidth, 600);
@@ -65,13 +65,6 @@ class GameScene extends Phaser.Scene {
         this.player = new Player(this, 400, 300, 10, 10, 0xFFFFE0);
         this.cameras.main.startFollow(this.player);
         this.cameras.main.setDeadzone(200, 600);
-
-
-
-        this.bulletSpeed = 1500;
-        // this.shootKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-
-        this.bullets = this.physics.add.group();
 
         this.enemies = this.add.group({
             classType: Enemy,
@@ -137,31 +130,29 @@ class GameScene extends Phaser.Scene {
         }];
         this.coins = Coin.createCoins(this, coinPositions);
         this.physics.add.overlap(this.player, this.coins, Coin.collectItem, null, this);
+
+        this.shootKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        this.bullets = this.add.group({
+            classType: Bullet,
+            runChildUpdate: true
+        });
+
+        this.physics.add.collider(this.bullets, this.enemies, (bullet, enemy) => {
+            bullet.destroy();
+            enemy.destroy();
+        });
     }
 
     update() {
-
-        this.physics.collide(this.bullets, this.enemies, (bullet, enemy) => {
-            bullet.destroy();
-            enemy.destroy();
-        })
-
+        if (this.shootKey.isDown) {
+            const bullet = Bullet.fireBullet(this, this.player.x, this.player.y, this.player.facing);
+            if (bullet) {
+                this.bullets.add(bullet);
+            }
+        }
         this.player.update();
     }
 
-    shootBullet() {
-        let bullet = this.bullets.create(this.player.x, this.player.y, 'bulletTexture');
-
-        if (this.player.facing == 'right') {
-            bullet.setVelocityX(this.bulletSpeed);
-        } else if (this.player.facing == 'left') {
-            bullet.setVelocityX(-this.bulletSpeed);
-        }
-
-        bullet.setCollideWorldBounds(false);
-        bullet.outOfBoundsKill = true;
-        bullet.body.allowGravity = false;
-    }
     updateEnemies() {
         this.enemies.getChildren().forEach(enemy => {
             enemy.changeDirection(this.player);
