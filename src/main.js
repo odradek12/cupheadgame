@@ -55,7 +55,7 @@ class GameScene extends Phaser.Scene {
         //Setting camera & world bounds
         let levelWidth = 3600;
 
-        this.cameras.main.setBackgroundColor(0x000000);
+        this.cameras.main.setBackgroundColor(0x5b6f8f);
         this.cameras.main.setBounds(0, 0, levelWidth, 600);
         this.physics.world.setBounds(0, 0, levelWidth, 600);
 
@@ -75,7 +75,11 @@ class GameScene extends Phaser.Scene {
         for (let i = 0; i < 3; i++) {
             this.enemies.add(new Enemy(this, 100 + (50 * i), 450));
         }
+
         this.level.setupCollisions([this.player, this.enemies]);
+        this.platformCollision = this.level.setupPlatformCollisions(this.player);
+
+        console.log(platformCollision);
 
         this.time.addEvent({
             delay: 1000,
@@ -140,6 +144,7 @@ class GameScene extends Phaser.Scene {
             bullet.destroy();
             enemy.destroy();
         });
+        // this.physics.add.overlap(this.player, this.level.platforms, this.platformLanding, null, this);
     }
 
     update() {
@@ -149,7 +154,30 @@ class GameScene extends Phaser.Scene {
                 this.bullets.add(bullet);
             }
         }
+        // this.physics.collide(this.player, this.level.platforms, function(player, platform) {
+        //     if (player.body.velocity.y < 0) {
+        //                          console.log("2velocity: " + player.body.velocity.y);
+        //         console.log("2player.y: " + player.y);
+        //         console.log("2platform.y - platform.height / 2: " + platform.height / 2);
+        //         return false; // No collision if player is moving up or is below the platform
+        //     } else {
+        //          console.log("velocity: " + player.body.velocity.y);
+        //         console.log("player.y: " + player.y);
+        //         console.log("platform.y - platform.height / 2: " + platform.height / 2);
+        //         return false; // Collide if player is moving down and is above the platform
+
+        //     }
+        // }, null, this);
         this.player.update();
+
+        // console.log(this.player.body.velocity.y);
+        if (this.player.body.velocity.y < 0) {
+            console.log(this.player);
+            // this.platformCollision = false;
+            // console.log("false at: " + this.player.body.velocity.y);
+        } else {
+            // this.platformCollision = true;
+        }
     }
 
     updateEnemies() {
@@ -157,6 +185,15 @@ class GameScene extends Phaser.Scene {
             enemy.changeDirection(this.player);
         });
     }
+
+    // platformLanding(player, platform) {
+    //     if (player.body.velocity.y > 0 && player.y < platform.y) {
+    //         // Land on the platform
+    //         player.body.velocity.y = 0;
+    //         player.y = platform.y - platform.height / 2 - player.height;
+    //         player.body.blocked.down = true;
+    //     }
+    // }
 }
 
 const config = {
