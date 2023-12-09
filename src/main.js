@@ -53,7 +53,7 @@ class GameScene extends Phaser.Scene {
 
     create() {
         //Setting camera & world bounds
-        let levelWidth = 2400;
+        let levelWidth = 3600;
 
         this.cameras.main.setBackgroundColor(0x000000);
         this.cameras.main.setBounds(0, 0, levelWidth, 600);
@@ -84,22 +84,21 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        this.platforms = this.physics.add.staticGroup();
-        this.platforms.create(275, 400, 'platformTexture');
-        this.platforms.create(425, 400, 'platformTexture');
-        this.physics.add.collider(this.player, this.platforms);
+
 
         // Add trees to background
 
         this.trees = this.add.group();
 
-        for (let j = 0; j < 4; j++) {
-            let xPosition = j * 150;
-            let tree = this.add.sprite(xPosition, this.cameras.main.centerY + 150, 'treeTexture');
-            let treeScale = Phaser.Math.Between(70, 100) / 100;
+        for (let j = 0; j < 8; j++) {
+            let treeConstant = 175
+            let xPosition = j * treeConstant;
+            let randomXPosition = Phaser.Math.Between(xPosition, ((j + 1) * treeConstant));
+            let tree = this.add.sprite(randomXPosition, this.cameras.main.centerY + 150, 'treeTexture');
+            let treeScale = Phaser.Math.Between(64, 100) / 100;
             tree.setScale(treeScale);
 
-            let treeHeight = Phaser.Math.Between(0, 40);
+            let treeHeight = Phaser.Math.Between(-10, 20);
             tree.y -= treeHeight;
 
             tree.setDepth(-1);

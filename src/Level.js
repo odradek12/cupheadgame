@@ -2,6 +2,9 @@
 export class Level {
     constructor(scene) {
         this.scene = scene;
+        this.ground = [];
+        this.platforms = [];
+        // this.platforms = this.physics.add.staticGroup();
     }
 
     preload() {
@@ -25,23 +28,33 @@ export class Level {
 
     createGround() {
         // Initial flat ground
-        this.ground1 = this.scene.add.rectangle(0, 600, 2134, 100, 0x00FF00).setOrigin(0, 1);
+        this.ground1 = this.scene.add.rectangle(0, 600, 2534, 100, 0x00FF00).setOrigin(0, 1);
         this.scene.physics.add.existing(this.ground1, true);
 
         // Elevated ground
-        this.ground2 = this.scene.add.rectangle(1067 + (533 / 2), 500, 533, 100, 0x32a852).setOrigin(0, 1);
+        this.ground2 = this.scene.add.rectangle(1024, 500, 533, 100, 0x32a852).setOrigin(0, 1);
         this.scene.physics.add.existing(this.ground2, true);
+
+        this.ground.push(this.ground1);
+        this.ground.push(this.ground2);
     }
 
     createPlatforms() {
-        // Create platforms here if needed
-        // e.g., this.platforms = this.scene.add.staticGroup();
+
+        // this.platforms.create(275, 400, 'platformTexture');
+        // this.platforms.create(425, 400, 'platformTexture');
+        // this.physics.add.collider(this.player, this.platforms);
+        
+
+
     }
 
     setupCollisions(assets) {
-        // for (let i = 0; i < assets.length; i++) {
         for (const asset of assets) {
-            this.scene.physics.add.collider(asset, [this.ground1, this.ground2]);
+            this.scene.physics.add.collider(asset, this.ground);
+        }
+        for (const asset of assets) {
+            this.scene.physics.add.collider(asset, this.platforms);
         }
         // Add more collision setups if necessary
     }
