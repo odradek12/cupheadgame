@@ -6,6 +6,18 @@ export class Level {
         this.platHeight = 8;
         this.platWidth = 125;
         this.platColor = '0x7ed64b';
+        this.enemySpawnY = '450';
+        this.enemySpawnPoints = [{
+                x: 600,
+                y: this.enemySpawnY ,
+                spawned: false
+            }, {
+                x: 1200,
+                y: this.enemySpawnY ,
+                spawned: false
+            },
+            // ... more spawn points ...
+        ];
     }
 
     preload() {}
@@ -37,43 +49,17 @@ export class Level {
 
         this.platforms.add(this.platform1);
         this.platforms.add(this.platform2);
-
-        // this.platforms.getChildren().forEach(platform => {
-        //     this.scene.physics.add.existing(platform, true); // 'true' makes it static
-        // });
     }
 
-    // setupCollisions(assets) {
-    //     for (const asset of assets) {
-    //         this.scene.physics.add.collider(asset, this.ground);
-    //         // this.scene.physics.add.collider(asset, this.platforms);
-    //     }
-    //     // Add more collision setups if necessary
-    // }
     setupCollisions(assets) {
         // Collision with ground
         for (const asset of assets) {
             this.scene.physics.add.collider(asset, this.ground);
-            // One-way collision with platforms
-            // this.scene.physics.add.collider(asset, this.platforms, function(asset, platform) {
-
-            //     return false; // No collision
-
-            // }, null, this);
         }
     }
     setupPlatformCollisions(asset) {
-        // Collision with ground
-        // for (const asset of assets) {
+        // Collision with platform
         const myCollision = this.scene.physics.add.collider(asset, this.platforms);
-        // console.log(myCollision);
-        // One-way collision with platforms
-        // this.scene.physics.add.collider(asset, this.platforms, function(asset, platform) {
-
-        //     return false; // No collision
-
-        // }, null, this);
-        // }
         return myCollision;
     }
 }

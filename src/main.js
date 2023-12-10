@@ -26,6 +26,20 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
         this.lastFired = 0;
+        this.platformCollision = null;
+
+        this.enemySpawnY = 450;
+        this.enemySpawnPoints = [{
+                x: 2000,
+                y: this.enemySpawnY,
+                spawned: false
+            }, {
+                x: 2050,
+                y: this.enemySpawnY,
+                spawned: false
+            },
+            // ... more spawn points ...
+        ];
     }
 
     preload() {
@@ -73,13 +87,12 @@ class GameScene extends Phaser.Scene {
 
         // Adding enemies to the group
         for (let i = 0; i < 3; i++) {
-            this.enemies.add(new Enemy(this, 100 + (50 * i), 450));
+            // this.enemies.add(new Enemy(this, 100 + (50 * i), this.enemySpawnY));
+            this.spawnEnemy(spawnPoint.x, spawnPoint.y);
         }
 
         this.level.setupCollisions([this.player, this.enemies]);
         this.platformCollision = this.level.setupPlatformCollisions(this.player);
-
-        console.log(platformCollision);
 
         this.time.addEvent({
             delay: 1000,
@@ -144,7 +157,6 @@ class GameScene extends Phaser.Scene {
             bullet.destroy();
             enemy.destroy();
         });
-        // this.physics.add.overlap(this.player, this.level.platforms, this.platformLanding, null, this);
     }
 
     update() {
@@ -154,46 +166,38 @@ class GameScene extends Phaser.Scene {
                 this.bullets.add(bullet);
             }
         }
-        // this.physics.collide(this.player, this.level.platforms, function(player, platform) {
-        //     if (player.body.velocity.y < 0) {
-        //                          console.log("2velocity: " + player.body.velocity.y);
-        //         console.log("2player.y: " + player.y);
-        //         console.log("2platform.y - platform.height / 2: " + platform.height / 2);
-        //         return false; // No collision if player is moving up or is below the platform
-        //     } else {
-        //          console.log("velocity: " + player.body.velocity.y);
-        //         console.log("player.y: " + player.y);
-        //         console.log("platform.y - platform.height / 2: " + platform.height / 2);
-        //         return false; // Collide if player is moving down and is above the platform
-
-        //     }
-        // }, null, this);
         this.player.update();
 
-        // console.log(this.player.body.velocity.y);
         if (this.player.body.velocity.y < 0) {
-            console.log(this.player);
-            // this.platformCollision = false;
-            // console.log("false at: " + this.player.body.velocity.y);
+            this.platformCollision.active = false;
         } else {
-            // this.platformCollision = true;
+            this.platformCollision.active = true;
         }
-    }
 
+        this.checkEnemySpawns()
+    }
+    checkEnemySpawns() {
+
+        const spawnDistance = 600; // Distance within which enemies will spawn
+
+        this.enemySpawnPoints.forEach(spawnPoint => {
+            if (!spawnPoint.spawned && Phaser.Math.Distance.Between(this.player.x, this.player.y, spawnPoint.x, spawnPoint.y) < spawnDistance) {
+                // Spawn the enemy
+                this.spawnEnemy(spawnPoint.x, spawnPoint.y);
+                spawnPoint.spawned = true;
+            }
+        });
+    }
+    spawnEnemy(x, y) {
+        const enemy = new Enemy(this, x, y);
+        this.enemies.add(enemy);
+        // Additional setup for the enemy if needed
+    }
     updateEnemies() {
         this.enemies.getChildren().forEach(enemy => {
             enemy.changeDirection(this.player);
         });
     }
-
-    // platformLanding(player, platform) {
-    //     if (player.body.velocity.y > 0 && player.y < platform.y) {
-    //         // Land on the platform
-    //         player.body.velocity.y = 0;
-    //         player.y = platform.y - platform.height / 2 - player.height;
-    //         player.body.blocked.down = true;
-    //     }
-    // }
 }
 
 const config = {
