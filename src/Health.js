@@ -18,6 +18,7 @@ export class Health {
 
         if (this.health <= 0) {
             // Handle player death if necessary
+            console.log("player dead");
         }
     }
 
