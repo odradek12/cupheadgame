@@ -1,0 +1,71 @@
+diff --git a/src/Player.js b/src/Player.js
+index b02414e..24118cc 100644
+--- a/src/Player.js
++++ b/src/Player.js
+@@ -4,10 +4,13 @@ export class Player extends Phaser.GameObjects.Rectangle {
+         this.scene = scene;
+ 
+         this.playerSpeed = 250;
++        this.playerHealth = 3;
++        this.isInvulnerable = false;
++        this.enemyCollider = null;
++        this.invulnerabilityDuration = 800;
+ 
+         this.scene.add.existing(this);
+ 
+-        // Adding physics
+         this.scene.physics.add.existing(this);
+         this.body.setCollideWorldBounds(true);
+ 
+@@ -37,4 +40,50 @@ export class Player extends Phaser.GameObjects.Rectangle {
+             this.body.setVelocityX(0);
+         }
+     }
++
++    takeDamage() {
++        // console.log("collided");
++        if (!this.isInvulnerable) {
++            this.playerHealth -= 1;
++            this.isInvulnerable = true;
++            this.flashEffect();
++            this.disableCollision();
++
++            // console.log("invuln");
++            this.scene.time.delayedCall(this.invulnerabilityDuration, () => {
++                this.isInvulnerable = false;
++                // this.clearTint();
++                this.enableCollision();
++                console.log("not invuln");
++            });
++        }
++    }
++
++    flashEffect() {
++        this.scene.tweens.add({
++            targets: this,
++            alpha: {
++                from: 1,
++                to: 0
++            },
++            ease: 'Linear',
++            duration: (this.invulnerabilityDuration / 5),
++            repeat: 2,
++            yoyo: true
++        });
++    }
++    setEnemyCollider(collider) {
++        this.enemyCollider = collider;
++    }
++
++    disableCollision() {
++        if (this.enemyCollider) {
++            this.enemyCollider.active = false;
++        }
++    }
++    enableCollision() {
++        if (this.enemyCollider) {
++            this.enemyCollider.active = true;
++        }
++    }
+ }
+\ No newline at end of file

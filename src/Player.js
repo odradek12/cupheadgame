@@ -37,4 +37,16 @@ export class Player extends Phaser.GameObjects.Rectangle {
             this.body.setVelocityX(0);
         }
     }
+
+        takeDamage() {
+        if (!this.isInvulnerable) {
+            this.health -= 1;
+            this.isInvulnerable = true;
+            this.flashEffect();
+            this.scene.time.delayedCall(this.invulnerabilityDuration, () => {
+                this.isInvulnerable = false;
+                this.clearTint();
+            });
+        }
+    }
 }

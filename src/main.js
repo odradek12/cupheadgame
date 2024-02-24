@@ -22,6 +22,10 @@ import {
     Bullet
 } from './Bullet.js';
 
+import {
+    Health
+} from './Health.js';
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
@@ -87,8 +91,8 @@ class GameScene extends Phaser.Scene {
 
         // Adding enemies to the group
         for (let i = 0; i < 3; i++) {
-            // this.enemies.add(new Enemy(this, 100 + (50 * i), this.enemySpawnY));
-            this.spawnEnemy(spawnPoint.x, spawnPoint.y);
+            this.enemies.add(new Enemy(this, 100 + (50 * i), this.enemySpawnY));
+            // this.spawnEnemy(spawnPoint.x, spawnPoint.y);
         }
 
         this.level.setupCollisions([this.player, this.enemies]);
@@ -125,6 +129,8 @@ class GameScene extends Phaser.Scene {
             this.trees.add(tree);
         }
 
+        this.health = new Health(this, 3);
+
         const coinPositions = [{
             x: 300,
             y: 300
@@ -144,6 +150,9 @@ class GameScene extends Phaser.Scene {
             x: 900,
             y: 400
         }];
+
+        // collisions & inputs
+
         this.coins = Coin.createCoins(this, coinPositions);
         this.physics.add.overlap(this.player, this.coins, Coin.collectItem, null, this);
 
@@ -157,6 +166,13 @@ class GameScene extends Phaser.Scene {
             bullet.destroy();
             enemy.destroy();
         });
+
+        // this.physics.add.overlap(this.player, this.enemies, () => {
+        //     console.log("good grief");
+        // }, null, this);
+
+        this.physics.add.overlap(this.player, this.enemies, Health.registerHit, null, this);
+
     }
 
     update() {
